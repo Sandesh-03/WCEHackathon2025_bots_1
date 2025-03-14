@@ -13,114 +13,307 @@ class LocationDataTab extends StatefulWidget {
 }
 
 class _LocationDataTabState extends State<LocationDataTab> {
+ String nearestSiteData = "Select a location";
+  String apiData = "Select a location and date to fetch air quality data";
+  String reportSummary = "Report will be generated here.";
+  bool isGeneratingReport = false;
+  DateTime startDate = DateTime.now().subtract(Duration(days: 7));
+  DateTime endDate = DateTime.now();
+  LatLng? selectedLocation;
+  GoogleMapController? mapController;
+  String selectedSiteId = "";
+  final String geminiApiKey = "AIzaSyDhUtvjS8lgDcsWH85lDC8pnMdeSce9cok";
+  late GenerativeModel model;
+
   @override
   void initState() {
     super.initState();
-    // Load site data when the widget is initialized
-    Provider.of<LocationDataProvider>(context, listen: false).loadSiteData();
+    model = GenerativeModel(model: "gemini-2.0-flash", apiKey: geminiApiKey);
   }
 
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
-    final provider = Provider.of<LocationDataProvider>(context, listen: false);
-    final pickedDate = await showDatePicker(
+    DateTime initialDate = isStartDate ? startDate : endDate;
+    final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: isStartDate ? provider.startDate ?? DateTime.now() : provider.endDate ?? DateTime.now(),
+      initialDate: initialDate,
       firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
+      lastDate: DateTime(2030),
     );
+    if (picked != null && picked != initialDate) {
+      setState(() {
+        if (isStartDate) {
+          startDate = picked;
+        } else {
+          endDate = picked;
+        }
+      });
 
-    if (pickedDate != null) {
-      if (isStartDate) {
-        provider.setStartDate(pickedDate);
-      } else {
-        provider.setEndDate(pickedDate);
+      // Recalculate air quality data after updating dates
+      if (selectedSiteId.isNotEmpty) {
+        fetchAirQualityData(selectedSiteId);
       }
+    }
+  }
+
+  Future<void> determinePosition() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+    if (permission == LocationPermission.deniedForever) {
+      setState(() {
+        nearestSiteData = "Location permission denied permanently.";
+      });
+      return;
+    }
+    Position position = await Geolocator.getCurrentPosition();
+    setLocation(LatLng(position.latitude, position.longitude));
+  }
+
+  void setLocation(LatLng location) {
+    setState(() {
+      selectedLocation = location;
+    });
+    findNearestSite(location.latitude, location.longitude);
+  }
+
+  Future<void> findNearestSite(double userLat, double userLon) async {
+    String jsonString = await rootBundle.loadString('assets/site_ids.json');
+    List<dynamic> jsonData = json.decode(jsonString);
+    dynamic nearestSite;
+    double minDistance = double.infinity;
+
+    for (var site in jsonData) {
+      double siteLat = site['lat'];
+      double siteLon = site['lon'];
+      double distance = Geolocator.distanceBetween(userLat, userLon, siteLat, siteLon);
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestSite = site;
+      }
+    }
+
+    if (nearestSite != null) {
+      setState(() {
+        nearestSiteData = "Nearest Site ID: ${nearestSite['id']}\nName: ${nearestSite['name']}\nCity: ${nearestSite['city']}";
+        selectedSiteId = nearestSite['id']; // Store selected Site ID
+      });
+      fetchAirQualityData(nearestSite['id']);
+    } else {
+      setState(() {
+        nearestSiteData = "No site found nearby.";
+      });
+    }
+  }
+
+  Future<void> fetchAirQualityData(String siteId) async {
+    String formattedStartDate = DateFormat("yyyy-MM-dd'T'HH:mm").format(startDate);
+    String formattedEndDate = DateFormat("yyyy-MM-dd'T'HH:mm").format(endDate);
+    String params = "pm2.5cnc,pm10cnc";
+    String interval = "hh";
+    String avgHours = "1";
+    String apiKey = "63h3AckbgtY";
+
+    String apiUrl = "http://atmos.urbansciences.in/adp/v4/getDeviceDataParam/imei/$siteId/params/$params/startdate/$formattedStartDate/enddate/$formattedEndDate/ts/$interval/avg/$avgHours/api/$apiKey?gaps=1&gap_value=NaN";
+
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+      if (response.statusCode == 200) {
+        setState(() {
+          apiData = response.body;
+        });
+      } else {
+        setState(() {
+          apiData = "Failed to fetch data. Error code: ${response.statusCode}";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        apiData = "Error fetching data: $e";
+      });
+    }
+
+  }
+
+
+  Future<void> generateReport() async {
+    setState(() {
+      isGeneratingReport = true;
+      reportSummary = "Generating Report...";
+    });
+
+    try {
+      final prompt = "Analyze the following air quality data containing timestamp (dt_time), PM2.5 concentration (pm2.5cnc), PM10 concentration (pm10cnc), and device ID (deviceid). Provide the following insights: General Trends: Identify the overall trend in PM2.5 and PM10 levels over time. Are there significant increases or decreases? Peak Hours: Find the highest and lowest PM2.5 and PM10 values, and specify the corresponding timestamps. Daily Averages: Calculate and report daily average PM2.5 and PM10 concentrations. Hourly Patterns: Determine if there are specific hours of the day where pollution levels are consistently high or low. Anomalies: Detect any unusual spikes in pollution levels and potential reasons for them. Correlation Analysis: Check if there is any correlation between PM2.5 and PM10 levels. Suggestions: Provide recommendations based on air quality trends for residents in this area (do not give code give report): \n\n$apiData";
+      final response = await model.generateContent([Content.text(prompt)]);
+      setState(() {
+        reportSummary = response.text ?? "No report generated.";
+      });
+    } catch (e) {
+      setState(() {
+        reportSummary = "Error generating report: $e";
+      });
+    } finally {
+      setState(() {
+        isGeneratingReport = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<LocationDataProvider>(context);
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          // Location Selector Dropdown
-         DropdownButton<String>(
-            value: provider.selectedSiteId,
-            hint: const Text('Select Location'),
-            items: provider.siteData.map<DropdownMenuItem<String>>((site) {
-              return DropdownMenuItem<String>(
-                value: site['id'].toString(), // Ensure the value is a String
-                child: Text('${site['name']} (${site['city']})'),
-              );
-            }).toList(),
-            onChanged: (value) {
-              provider.setSelectedSiteId(value);
-            },
-          ),
-          const SizedBox(height: 20),
-
-          // Date Selectors
-          Expanded(
-            child: Row(
+    return
+      Scaffold(
+        appBar: AppBar(
+          title: Text('Air Quality Monitor'),
+          centerTitle: true,
+          elevation: 4,
+        ),
+        body: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(provider.startDate == null ? 'Start Date: Not Selected' : 'Start Date: ${provider.startDate!.toLocal()}'),
-                const SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: () => _selectDate(context, true),
-                  child: const Text('Select Start Date'),
+                ElevatedButton.icon(
+                  onPressed: determinePosition,
+                  icon: Icon(Icons.my_location),
+                  label: Text("Use Current Location"),
+
                 ),
+                SizedBox(height: 15),
+
+                Text('Tap on the map to select a location:',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+
+                SizedBox(height: 10),
+
+                Card(
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      height: 300,
+                      child: GoogleMap(
+                        initialCameraPosition: CameraPosition(
+                          target: LatLng(20.5937, 78.9629),
+                          zoom: 5,
+                        ),
+                        onMapCreated: (controller) => mapController = controller,
+                        onTap: setLocation,
+                        markers: selectedLocation == null
+                            ? {}
+                            : {
+                          Marker(
+                            markerId: MarkerId("selected"),
+                            position: selectedLocation!,
+                          )
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 15),
+
+                Wrap(
+                  spacing: 10,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => _selectDate(context, true),
+                      child: Text("Start Date: ${DateFormat('yyyy-MM-dd').format(startDate)}"),
+
+                    ),
+                    ElevatedButton(
+                      onPressed: () => _selectDate(context, false),
+                      child: Text("End Date: ${DateFormat('yyyy-MM-dd').format(endDate)}"),
+
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 15),
+                Text(
+                  nearestSiteData,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 20),
+
+                ElevatedButton(
+                  onPressed: generateReport,
+                  child: Text("Generate Report"),
+
+                ),
+                SizedBox(height: 10),
+
+                isGeneratingReport
+                    ? Center(child: CircularProgressIndicator())
+                    : Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(12),
+                    // child: Text(reportSummary, style: TextStyle(fontSize: 16)),
+                    child:Card(
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(12),
+                        child: MarkdownBody(
+                          data: reportSummary,
+                          styleSheet: MarkdownStyleSheet(
+                            p: TextStyle(fontSize: 16),
+                            h1: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                            h2: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            strong: TextStyle(fontWeight: FontWeight.bold),
+                            blockquote: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 10),
+
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AirQualityChart(apiData: apiData)),
+                    );
+                  },
+                  child: Text("View Air Quality Chart"),
+                ),
+
+
+
+
+
+
+                Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Text(apiData, style: TextStyle(fontSize: 16)),
+                  ),
+                ),
+
               ],
             ),
           ),
-          const SizedBox(height: 20),
-          Expanded(
-            child: Row(
-              children: [
-                Text(provider.endDate == null ? 'End Date: Not Selected' : 'End Date: ${provider.endDate!.toLocal()}'),
-                const SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: () => _selectDate(context, false),
-                  child: const Text('Select End Date'),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
+        ),
+      );
 
-          // Parameter Selector
-          DropdownButton<String>(
-            value: provider.selectedParams,
-            items: const [
-              DropdownMenuItem(value: 'pm2.5cnc', child: Text('PM2.5')),
-              DropdownMenuItem(value: 'pm10cnc', child: Text('PM10')),
-              DropdownMenuItem(value: 'pm2.5cnc,pm10cnc', child: Text('Both PM2.5 and PM10')),
-            ],
-            onChanged: (value) {
-              provider.setSelectedParams(value!);
-            },
-          ),
-          const SizedBox(height: 20),
 
-          // Fetch Data Button
-          ElevatedButton(
-            onPressed: () {
-              provider.fetchAirQualityData();
-            },
-            child: const Text('Fetch Air Quality Data'),
-          ),
-          const SizedBox(height: 20),
-
-          // Display Air Quality Data
-          Expanded(
-            child: SingleChildScrollView(
-              child: Text(provider.apiData, style: const TextStyle(fontSize: 16)),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
