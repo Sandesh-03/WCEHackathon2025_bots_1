@@ -18,6 +18,7 @@ class LocationDataTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        const SizedBox(height: 10,),
         ElevatedButton.icon(
           onPressed: () async {
             await locationProvider.fetchLocation();

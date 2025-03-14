@@ -12,19 +12,39 @@ class NotificationService {
 
   Future<void> init() async {
     const AndroidInitializationSettings androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher'); // ✅ Ensure this icon exists
-
+        AndroidInitializationSettings('@mipmap/ic_launcher'); 
     const InitializationSettings initSettings =
         InitializationSettings(android: androidSettings);
 
     await _flutterLocalNotificationsPlugin.initialize(initSettings);
 
-    // Request notification permissions
     if (Platform.isAndroid) {
-      await _flutterLocalNotificationsPlugin
+      final androidImplementation = _flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
-          ?.requestNotificationsPermission(); 
+              AndroidFlutterLocalNotificationsPlugin>();
+
+      if (androidImplementation != null) {
+        await androidImplementation.requestNotificationsPermission(); 
+      }
+    }
+
+    await _createNotificationChannel();
+  }
+
+  Future<void> _createNotificationChannel() async {
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+      'AQI_Channel_ID',
+      'AQI Notifications',
+      description: 'Notifications for AQI updates',
+      importance: Importance.high,
+    );
+
+    final androidImplementation = _flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+
+    if (androidImplementation != null) {
+      await androidImplementation.createNotificationChannel(channel);
     }
   }
 
@@ -42,7 +62,7 @@ class NotificationService {
         NotificationDetails(android: androidDetails);
 
     await _flutterLocalNotificationsPlugin.show(
-      0,
+      0, 
       title,
       body,
       notificationDetails,

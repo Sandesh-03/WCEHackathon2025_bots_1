@@ -7,12 +7,21 @@ class NotificationScheduler {
 
   static void startBiHourlyUpdates(AqiWeatherProvider provider, double lat, double lon) {
     _timer?.cancel();
+
     _timer = Timer.periodic(const Duration(hours: 2), (timer) async {
       await provider.fetchAqiAndWeather(lat, lon); 
-      NotificationService().showNotification(
-        "🌤 AQI Update",
-        "AQI: ${provider.aqi}",
-      );
+
+      // ignore: unnecessary_null_comparison
+      if (provider.aqi != null) {
+        NotificationService().showNotification(
+          "🌤 AQI Update",
+          "Current AQI: ${provider.aqi}",
+        );
+      }
     });
+  }
+
+  static void stopUpdates() {
+    _timer?.cancel();
   }
 }

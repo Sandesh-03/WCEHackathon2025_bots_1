@@ -1,3 +1,4 @@
+import 'package:aqi/presentation/pages/chart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../pages/chat_screen.dart';
@@ -68,14 +69,26 @@ class _CustomDrawerState extends State<CustomDrawer> {
                       locationData: locationDataProvider,
                     )),
               ),
+
+              CustomListTile(
+                isCollapsed: _isCollapsed,
+                icon: Icons.bar_chart,
+                title: 'Chart',
+                infoCount: 0,
+                onTap: () => _navigateToScreen(
+                    context,
+                    AirQualityChart(
+                      apiData: locationDataProvider.apiData,
+                    )),
+              ),
               const Divider(color: Colors.grey),
               const Spacer(),
               CustomListTile(
                 isCollapsed: _isCollapsed,
-                icon: Icons.person,
+                icon: Icons.info,
                 title: 'About us',
                 infoCount: 0,
-                onTap: () => _navigateToScreen(context, const AboutUSScreen()),
+                onTap: () => _navigateToScreen(context, const AboutUsScreen()),
               ),
               CustomListTile(
                 isCollapsed: _isCollapsed,

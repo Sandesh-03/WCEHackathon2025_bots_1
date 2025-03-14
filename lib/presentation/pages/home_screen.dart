@@ -4,6 +4,7 @@ import '../providers/aqi_weather_provider.dart';
 import '../providers/location_data_provider.dart';
 import '../providers/location_provider.dart';
 import '../widgets/drawer/custom_drawer.dart';
+import '../widgets/home_cards.dart';
 import '../widgets/location_data_tab.dart';
 import 'chart_screen.dart';
 
@@ -87,21 +88,20 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    _buildInfoCard("City", aqiProvider.weatherData!.city, Icons.location_city),
-                    _buildInfoCard("AQI", "${aqiProvider.aqiData!.aqi}", Icons.air),
-                    _buildInfoCard("Temperature", "${aqiProvider.weatherData!.temperature}°C", Icons.thermostat),
-                    _buildInfoCard("Weather", aqiProvider.weatherData!.description, Icons.wb_sunny),
+                    buildInfoCard("City", aqiProvider.weatherData!.city, Icons.location_city),
+                    buildInfoCard("AQI", "${aqiProvider.aqiData!.aqi}", Icons.air),
+                    buildInfoCard("Temperature", "${aqiProvider.weatherData!.temperature}°C", Icons.thermostat),
+                    buildInfoCard("Weather", aqiProvider.weatherData!.description, Icons.wb_sunny),
                     const SizedBox(height: 20),
 
-                    // Clickable Most & Least Polluted Hour
                     GestureDetector(
                       onTap: () => _navigateToChart(context, locationProvider.apiData),
-                      child: _buildPollutionCard("Most Polluted Hour", locationProvider.mostPollutedHour, Colors.redAccent),
+                      child: buildPollutionCard("Most Polluted Hour", locationProvider.mostPollutedHour, Colors.redAccent),
                     ),
                     const SizedBox(height: 10),
                     GestureDetector(
                       onTap: () => _navigateToChart(context, locationProvider.apiData),
-                      child: _buildPollutionCard("Least Polluted Hour", locationProvider.leastPollutedHour, Colors.blueAccent),
+                      child: buildPollutionCard("Least Polluted Hour", locationProvider.leastPollutedHour, Colors.blueAccent),
                     ),
                   ],
                 ),
@@ -113,28 +113,5 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildInfoCard(String title, String value, IconData icon) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 3,
-      child: ListTile(
-        leading: Icon(icon, size: 30, color: Colors.blueAccent),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(value, style: const TextStyle(fontSize: 16)),
-      ),
-    );
-  }
-
-  Widget _buildPollutionCard(String title, String value, Color color) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 3,
-      color: color.withOpacity(0.2),
-      child: ListTile(
-        title: Text(title, style: TextStyle(fontWeight: FontWeight.bold, color: color)),
-        subtitle: Text(value, style: TextStyle(fontSize: 16, color: color)),
-        trailing: const Icon(Icons.arrow_forward_ios, color: Colors.grey),
-      ),
-    );
-  }
+  
 }
