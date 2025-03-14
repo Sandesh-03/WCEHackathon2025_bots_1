@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/aqi_weather_provider.dart';
 import '../providers/location_provider.dart';
 import '../widgets/drawer/custom_drawer.dart';
+import '../widgets/location_data_tab.dart';
 
 
 
@@ -89,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               );
             },
           ),
-          const Scaffold(),
+          const LocationDataTab(),
         ],
       ),
     );
