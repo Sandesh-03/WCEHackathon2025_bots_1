@@ -1,9 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../pages/chat_screen.dart';
 import '../../pages/home_screen.dart';
-import '../../pages/notifications_screen.dart';
+import '../../pages/about_us_screen.dart';
 import '../../pages/settings_screen.dart';
 import '../../providers/location_data_provider.dart';
 import 'custom_list_tile.dart';
@@ -69,7 +68,6 @@ class _CustomDrawerState extends State<CustomDrawer> {
                       locationData: locationDataProvider,
                     )),
               ),
-             
               const Divider(color: Colors.grey),
               const Spacer(),
               CustomListTile(
@@ -77,8 +75,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 icon: Icons.person,
                 title: 'About us',
                 infoCount: 0,
-                onTap: () =>
-                    _navigateToScreen(context, const NotificationsScreen()),
+                onTap: () => _navigateToScreen(context, const AboutUSScreen()),
               ),
               CustomListTile(
                 isCollapsed: _isCollapsed,

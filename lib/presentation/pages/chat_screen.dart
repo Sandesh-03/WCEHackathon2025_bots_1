@@ -57,6 +57,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void sendMessage(String message) async {
     setState(() {
       chatHistory.add({"role": "user", "message": message});
+
     });
 
     try {
