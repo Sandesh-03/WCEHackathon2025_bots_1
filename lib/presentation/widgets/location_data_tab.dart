@@ -8,8 +8,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
-import '../providers/location_data_provider.dart';
 
 
 
@@ -26,6 +24,7 @@ class _LocationDataTabState extends State<LocationDataTab> {
   String reportSummary = "Report will be generated here.";
   bool isGeneratingReport = false;
   DateTime startDate = DateTime.now().subtract(const Duration(days: 7));
+
   DateTime endDate = DateTime.now();
   LatLng? selectedLocation;
   GoogleMapController? mapController;
@@ -82,6 +81,7 @@ class _LocationDataTabState extends State<LocationDataTab> {
     setState(() {
       selectedLocation = location;
     });
+
     findNearestSite(location.latitude, location.longitude);
   }
 
@@ -142,6 +142,7 @@ class _LocationDataTabState extends State<LocationDataTab> {
     }
 
   }
+
 
 
   Future<void> generateReport() async {
