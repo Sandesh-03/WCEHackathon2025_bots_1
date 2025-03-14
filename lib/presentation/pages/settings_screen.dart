@@ -12,7 +12,9 @@ class SettingsScreen extends StatelessWidget {
     final aqiProvider = Provider.of<AqiWeatherProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Settings")),
+      appBar: AppBar(
+        
+          title: const Text("Settings")),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

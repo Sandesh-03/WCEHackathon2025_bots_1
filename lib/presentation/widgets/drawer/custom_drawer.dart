@@ -1,15 +1,16 @@
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../pages/chat_screen.dart';
 import '../../pages/home_screen.dart';
-import '../../pages/map_screen.dart';
 import '../../pages/notifications_screen.dart';
 import '../../pages/settings_screen.dart';
+import '../../providers/location_data_provider.dart';
 import 'custom_list_tile.dart';
 import 'header.dart';
 
-
 class CustomDrawer extends StatefulWidget {
-  const CustomDrawer({super.key});
+  const CustomDrawer({super.key, required String apiData});
 
   @override
   State<CustomDrawer> createState() => _CustomDrawerState();
@@ -27,11 +28,13 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final locationDataProvider = Provider.of<LocationDataProvider>(context);
     return SafeArea(
       child: AnimatedContainer(
         curve: Curves.easeInOutCubic,
         duration: const Duration(milliseconds: 500),
         width: _isCollapsed ? 300 : 70,
+        height: 600,
         margin: const EdgeInsets.only(bottom: 10, top: 10),
         decoration: const BoxDecoration(
           borderRadius: BorderRadius.only(
@@ -48,7 +51,6 @@ class _CustomDrawerState extends State<CustomDrawer> {
             children: [
               CustomDrawerHeader(isColapsed: _isCollapsed),
               const Divider(color: Colors.grey),
-              
               CustomListTile(
                 isCollapsed: _isCollapsed,
                 icon: Icons.home_outlined,
@@ -60,27 +62,23 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 isCollapsed: _isCollapsed,
                 icon: Icons.message_rounded,
                 title: 'Chat',
-                infoCount: 8,
-                onTap: () => _navigateToScreen(context, const ChatScreen()),
-              ),
-              CustomListTile(
-                isCollapsed: _isCollapsed,
-                icon: Icons.map,
-                title: 'Map',
                 infoCount: 0,
-                doHaveMoreOptions: Icons.arrow_forward_ios,
-                onTap: () => _navigateToScreen(context, const MapScreen()),
+                onTap: () => _navigateToScreen(
+                    context,
+                    ChatScreen(
+                      locationData: locationDataProvider,
+                    )),
               ),
-              
+             
               const Divider(color: Colors.grey),
               const Spacer(),
-
               CustomListTile(
                 isCollapsed: _isCollapsed,
-                icon: Icons.notifications,
-                title: 'Notifications',
-                infoCount: 2,
-                onTap: () => _navigateToScreen(context, const NotificationsScreen()),
+                icon: Icons.person,
+                title: 'About us',
+                infoCount: 0,
+                onTap: () =>
+                    _navigateToScreen(context, const NotificationsScreen()),
               ),
               CustomListTile(
                 isCollapsed: _isCollapsed,
@@ -90,13 +88,16 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 onTap: () => _navigateToScreen(context, const SettingsScreen()),
               ),
               const SizedBox(height: 10),
-              
               Align(
-                alignment: _isCollapsed ? Alignment.bottomRight : Alignment.bottomCenter,
+                alignment: _isCollapsed
+                    ? Alignment.bottomRight
+                    : Alignment.bottomCenter,
                 child: IconButton(
                   splashColor: Colors.transparent,
                   icon: Icon(
-                    _isCollapsed ? Icons.arrow_back_ios : Icons.arrow_forward_ios,
+                    _isCollapsed
+                        ? Icons.arrow_back_ios
+                        : Icons.arrow_forward_ios,
                     color: Colors.white,
                     size: 16,
                   ),
