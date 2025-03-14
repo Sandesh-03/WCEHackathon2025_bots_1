@@ -33,28 +33,28 @@ class AirQualityChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Air Quality Levels")),
+      appBar: AppBar(title: const Text("Air Quality Levels")),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Text("PM2.5 Levels", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text("PM2.5 Levels", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             SizedBox(height: 300, child: LineChartWidget(spots: parseData('pm2.5cnc'))),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-            Text("PM10 Levels", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text("PM10 Levels", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             SizedBox(height: 300, child: LineChartWidget(spots: parseData('pm10cnc'))),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
 
-            Text("PM2.5 Levels", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text("PM2.5 Levels", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             SizedBox(height: 300, child: BarChartWidget(spots: parseData('pm2.5cnc'))),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-            Text("PM10 Levels", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text("PM10 Levels", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             SizedBox(height: 300, child: BarChartWidget(spots: parseData('pm10cnc'))),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-            Text("Overall PM Distribution", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text("Overall PM Distribution", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             SizedBox(height: 300, child: PieChartWidget(apiData: apiData)),
           ],
         ),
@@ -77,14 +77,14 @@ class LineChartWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return LineChart(
       LineChartData(
-        gridData: FlGridData(show: false),
+        gridData: const FlGridData(show: false),
         titlesData: FlTitlesData(
-          leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40)),
+          leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40)),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
               getTitlesWidget: (value, meta) {
-                return Text(formatDate(value), style: TextStyle(fontSize: 10));
+                return Text(formatDate(value), style: const TextStyle(fontSize: 10));
               },
               reservedSize: 40,
               interval: (spots.isNotEmpty) ? (spots.last.x - spots.first.x) / 5 : null,
@@ -122,7 +122,7 @@ class BarChartWidget extends StatelessWidget {
             barRods: [BarChartRodData(toY: spot.y, color: Colors.blue)],
           );
         }).toList(),
-        titlesData: FlTitlesData(show: true),
+        titlesData: const FlTitlesData(show: true),
       ),
     );
   }

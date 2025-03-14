@@ -1,6 +1,14 @@
+import 'dart:convert';
+import 'package:aqi/presentation/widgets/chart.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:http/http.dart'as http;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
 import '../providers/location_data_provider.dart';
 
 
@@ -17,7 +25,7 @@ class _LocationDataTabState extends State<LocationDataTab> {
   String apiData = "Select a location and date to fetch air quality data";
   String reportSummary = "Report will be generated here.";
   bool isGeneratingReport = false;
-  DateTime startDate = DateTime.now().subtract(Duration(days: 7));
+  DateTime startDate = DateTime.now().subtract(const Duration(days: 7));
   DateTime endDate = DateTime.now();
   LatLng? selectedLocation;
   GoogleMapController? mapController;
@@ -96,7 +104,7 @@ class _LocationDataTabState extends State<LocationDataTab> {
     if (nearestSite != null) {
       setState(() {
         nearestSiteData = "Nearest Site ID: ${nearestSite['id']}\nName: ${nearestSite['name']}\nCity: ${nearestSite['city']}";
-        selectedSiteId = nearestSite['id']; // Store selected Site ID
+        selectedSiteId = nearestSite['id']; 
       });
       fetchAirQualityData(nearestSite['id']);
     } else {
@@ -164,28 +172,28 @@ class _LocationDataTabState extends State<LocationDataTab> {
     return
       Scaffold(
         appBar: AppBar(
-          title: Text('Air Quality Monitor'),
+          title: const Text('Air Quality Monitor'),
           centerTitle: true,
           elevation: 4,
         ),
         body: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 ElevatedButton.icon(
                   onPressed: determinePosition,
-                  icon: Icon(Icons.my_location),
-                  label: Text("Use Current Location"),
+                  icon: const Icon(Icons.my_location),
+                  label: const Text("Use Current Location"),
 
                 ),
-                SizedBox(height: 15),
+                const SizedBox(height: 15),
 
-                Text('Tap on the map to select a location:',
+                const Text('Tap on the map to select a location:',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
 
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
 
                 Card(
                   elevation: 3,
@@ -194,10 +202,10 @@ class _LocationDataTabState extends State<LocationDataTab> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Container(
+                    child: SizedBox(
                       height: 300,
                       child: GoogleMap(
-                        initialCameraPosition: CameraPosition(
+                        initialCameraPosition: const CameraPosition(
                           target: LatLng(20.5937, 78.9629),
                           zoom: 5,
                         ),
@@ -207,7 +215,7 @@ class _LocationDataTabState extends State<LocationDataTab> {
                             ? {}
                             : {
                           Marker(
-                            markerId: MarkerId("selected"),
+                            markerId: const MarkerId("selected"),
                             position: selectedLocation!,
                           )
                         },
@@ -215,7 +223,7 @@ class _LocationDataTabState extends State<LocationDataTab> {
                     ),
                   ),
                 ),
-                SizedBox(height: 15),
+                const SizedBox(height: 15),
 
                 Wrap(
                   spacing: 10,
@@ -233,46 +241,46 @@ class _LocationDataTabState extends State<LocationDataTab> {
                   ],
                 ),
 
-                SizedBox(height: 15),
+                const SizedBox(height: 15),
                 Text(
                   nearestSiteData,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
 
                 ElevatedButton(
                   onPressed: generateReport,
-                  child: Text("Generate Report"),
+                  child: const Text("Generate Report"),
 
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
 
                 isGeneratingReport
-                    ? Center(child: CircularProgressIndicator())
+                    ? const Center(child: CircularProgressIndicator())
                     : Card(
                   elevation: 2,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Padding(
-                    padding: EdgeInsets.all(12),
-                    // child: Text(reportSummary, style: TextStyle(fontSize: 16)),
+                    padding: const EdgeInsets.all(12),
+                    
                     child:Card(
                       elevation: 2,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Padding(
-                        padding: EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(12),
                         child: MarkdownBody(
                           data: reportSummary,
                           styleSheet: MarkdownStyleSheet(
-                            p: TextStyle(fontSize: 16),
-                            h1: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                            h2: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                            strong: TextStyle(fontWeight: FontWeight.bold),
-                            blockquote: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+                            p: const TextStyle(fontSize: 16),
+                            h1: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                            h2: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            strong: const TextStyle(fontWeight: FontWeight.bold),
+                            blockquote: const TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
                           ),
                         ),
                       ),
@@ -280,7 +288,7 @@ class _LocationDataTabState extends State<LocationDataTab> {
                   ),
                 ),
 
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
 
                 ElevatedButton(
                   onPressed: () {
@@ -289,7 +297,7 @@ class _LocationDataTabState extends State<LocationDataTab> {
                       MaterialPageRoute(builder: (context) => AirQualityChart(apiData: apiData)),
                     );
                   },
-                  child: Text("View Air Quality Chart"),
+                  child: const Text("View Air Quality Chart"),
                 ),
 
 
@@ -303,8 +311,8 @@ class _LocationDataTabState extends State<LocationDataTab> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Padding(
-                    padding: EdgeInsets.all(12),
-                    child: Text(apiData, style: TextStyle(fontSize: 16)),
+                    padding: const EdgeInsets.all(12),
+                    child: Text(apiData, style: const TextStyle(fontSize: 16)),
                   ),
                 ),
 
@@ -313,7 +321,5 @@ class _LocationDataTabState extends State<LocationDataTab> {
           ),
         ),
       );
-
-
   }
 }

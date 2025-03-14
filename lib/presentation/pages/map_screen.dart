@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+// ignore: depend_on_referenced_packages
 import 'package:latlong2/latlong.dart';
 
 class MapScreen extends StatefulWidget {
@@ -34,14 +35,14 @@ class _MapScreenState extends State<MapScreen> {
         children: [
           TileLayer(
             urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-            subdomains: const ['a', 'b', 'c'], // Subdomains for the tile server
+            subdomains: const ['a', 'b', 'c'], 
           ),
           const MarkerLayer(
             markers: [
               Marker(
                 width: 80.0,
                 height: 80.0,
-                point: LatLng(51.509364, -0.128928), // Marker location
+                point: LatLng(51.509364, -0.128928), 
                 child: Icon(
                   Icons.location_pin,
                   color: Colors.red,

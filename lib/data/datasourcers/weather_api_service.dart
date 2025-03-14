@@ -12,7 +12,7 @@ class WeatherApiService {
     final response = await http.get(Uri.parse('$baseUrl?lat=$lat&lon=$lon&appid=${AppConstants.weatherApiKey}&units=metric'));
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
-      return WeatherModel.fromJson(jsonData); // Convert JSON to WeatherModel
+      return WeatherModel.fromJson(jsonData); 
     } else {
       throw Exception('Failed to load weather data');
     }

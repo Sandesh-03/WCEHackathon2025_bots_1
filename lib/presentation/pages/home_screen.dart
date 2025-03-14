@@ -5,9 +5,6 @@ import '../providers/location_provider.dart';
 import '../widgets/drawer/custom_drawer.dart';
 import '../widgets/location_data_tab.dart';
 
-
-
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
