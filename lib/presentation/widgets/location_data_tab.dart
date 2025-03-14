@@ -17,6 +17,8 @@ class _LocationDataTabState extends State<LocationDataTab> {
   String apiData = "Select a location and date to fetch air quality data";
   String reportSummary = "Report will be generated here.";
   bool isGeneratingReport = false;
+  String aqiData="";
+
   DateTime startDate = DateTime.now().subtract(Duration(days: 7));
   DateTime endDate = DateTime.now();
   LatLng? selectedLocation;
@@ -74,6 +76,8 @@ class _LocationDataTabState extends State<LocationDataTab> {
     setState(() {
       selectedLocation = location;
     });
+        fetchAQI(location.latitude, location.longitude);
+
     findNearestSite(location.latitude, location.longitude);
   }
 
@@ -134,6 +138,7 @@ class _LocationDataTabState extends State<LocationDataTab> {
     }
 
   }
+
 
 
   Future<void> generateReport() async {
