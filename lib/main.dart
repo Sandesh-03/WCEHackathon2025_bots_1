@@ -1,13 +1,13 @@
+import 'package:aqi/presentation/pages/splash_screen.dart';
+import 'package:aqi/presentation/providers/theme_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'data/datasourcers/notification_service.dart';
 import 'firebase_options.dart';
-import 'presentation/pages/home_screen.dart';
 import 'presentation/providers/aqi_weather_provider.dart';
 import 'presentation/providers/location_data_provider.dart';
 import 'presentation/providers/location_provider.dart';
-import 'presentation/providers/theme_provider.dart';
 
 
 
@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: themeProvider.themeMode,
-      home: const HomeScreen(),
+      home:  SplashScreen(),
     );
   }
 }

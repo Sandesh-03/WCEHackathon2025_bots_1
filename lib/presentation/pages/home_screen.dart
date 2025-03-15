@@ -145,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
                     GestureDetector(
                       onTap: () => _showCigaretteEquivalence(aqiProvider.aqiData!.aqi),
-                      child: buildInfoCard("AQI", "${aqiProvider.aqiData!.aqi}", Icons.air),
+                      child: buildInfoCard("AQI", "${aqiProvider.aqiData!.aqi} Tap to see the impact", Icons.air),
                     ),
 
                     buildInfoCard("Temperature", "${aqiProvider.weatherData!.temperature}°C", Icons.thermostat),
