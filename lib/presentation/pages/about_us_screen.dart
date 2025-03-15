@@ -39,7 +39,6 @@ class AboutUsScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // ✅ App Logo
                   ClipRRect(
                     borderRadius: BorderRadius.circular(50),
                     child: Image.asset(

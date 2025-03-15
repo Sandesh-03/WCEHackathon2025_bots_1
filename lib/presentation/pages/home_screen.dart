@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../providers/aqi_weather_provider.dart';
 import '../providers/location_data_provider.dart';
 import '../providers/location_provider.dart';
@@ -48,6 +49,58 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
+  double getCigaretteEquivalence(int aqi) {
+    if (aqi <= 50) return 0;
+    if (aqi <= 100) return 0.5;
+    if (aqi <= 150) return 1;
+    if (aqi <= 200) return 2;
+    if (aqi <= 300) return 3.5;
+    return 5; // 301-500 (Hazardous) → 5+ cigarettes
+  }
+
+  void _showCigaretteEquivalence(int aqi) {
+    double perDay = getCigaretteEquivalence(aqi);
+    double perWeek = perDay * 7;
+    double perMonth = perDay * 30;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Cigarette Equivalence'),
+          content: Text(
+            "Based on AQI $aqi:\n"
+            "🚬 ${perDay.toStringAsFixed(1)} cigarettes per day\n"
+            "📆 ${perWeek.toStringAsFixed(1)} cigarettes per week\n"
+            "📅 ${perMonth.toStringAsFixed(1)} cigarettes per month",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _shareAQIInfo(AqiWeatherProvider aqiProvider) {
+    int aqi = aqiProvider.aqiData!.aqi;
+    double cigarettes = getCigaretteEquivalence(aqi);
+
+    String message = "🌍 Air Quality Report 🌿\n"
+        "📍 City: ${aqiProvider.weatherData!.city}\n"
+        "💨 AQI: $aqi\n"
+        "🌡 Temperature: ${aqiProvider.weatherData!.temperature}°C\n"
+        "⛅ Weather: ${aqiProvider.weatherData!.description}\n\n"
+        "⚠️ Health Impact: Breathing this air is equivalent to smoking "
+        "${cigarettes.toStringAsFixed(1)} cigarettes per day! 🚬\n\n"
+        "Stay safe! 🏡💚";
+
+    Share.share(message);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,9 +142,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 child: Column(
                   children: [
                     buildInfoCard("City", aqiProvider.weatherData!.city, Icons.location_city),
-                    buildInfoCard("AQI", "${aqiProvider.aqiData!.aqi}", Icons.air),
+
+                    GestureDetector(
+                      onTap: () => _showCigaretteEquivalence(aqiProvider.aqiData!.aqi),
+                      child: buildInfoCard("AQI", "${aqiProvider.aqiData!.aqi}", Icons.air),
+                    ),
+
                     buildInfoCard("Temperature", "${aqiProvider.weatherData!.temperature}°C", Icons.thermostat),
                     buildInfoCard("Weather", aqiProvider.weatherData!.description, Icons.wb_sunny),
+
                     const SizedBox(height: 20),
 
                     GestureDetector(
@@ -103,6 +162,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       onTap: () => _navigateToChart(context, locationProvider.apiData),
                       child: buildPollutionCard("Least Polluted Hour", locationProvider.leastPollutedHour, Colors.blueAccent),
                     ),
+
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      onPressed: () => _shareAQIInfo(aqiProvider),
+                      icon: const Icon(Icons.share),
+                      label: const Text("Share AQI Report"),
+                    ),
                   ],
                 ),
               );
@@ -112,6 +178,4 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       ),
     );
   }
-
-  
 }
