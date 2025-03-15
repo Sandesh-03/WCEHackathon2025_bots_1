@@ -49,6 +49,7 @@ dependencies:
   google_generative_ai: ^0.4.6
   flutter_markdown: ^0.7.6+2
   share_plus: ^10.1.4
+  video_player: ^2.9.3
   
 
 dev_dependencies:
